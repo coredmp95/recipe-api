@@ -24,7 +24,7 @@ class UserManager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email, password):
         """Create a super user"""
         user = self.create_user(email, password)
         user.is_staff = True
@@ -52,7 +52,7 @@ class Recipe(models.Model):
         on_delete=models.CASCADE
     )
     title = models.CharField(max_length=255)
-    description = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
     time_minutes = models.IntegerField()
     price = models.DecimalField(max_digits=5, decimal_places=2)
     link = models.CharField(max_length=255, blank=True)
