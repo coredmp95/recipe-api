@@ -11,12 +11,22 @@ from recipe import serializers
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """The model view for the Recipe APIs"""
-    serializer_class = serializers.RecipeSerializer
+    serializer_class = serializers.RecipeDetailSerializer
     queryset = Recipe.objects.all()
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-
     def get_queryset(self):
         """Retrieve recipe for authenticated users"""
         return self.queryset.filter(user=self.request.user).order_by('-id')
+
+    def get_serializer_class(self):
+        """Get the Serializer for the current action"""
+        if self.action == 'list':
+            return serializers.RecipeSerializer
+        else:
+            return self.serializer_class
+
+    # def preform_create(self, serializer):
+    #     """Create a new Recipe"""
+    #     serializer.save(user=self.request.user)

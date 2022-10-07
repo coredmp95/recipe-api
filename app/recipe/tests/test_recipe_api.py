@@ -3,6 +3,7 @@ Test recipe apis enpoint.
 """
 
 from decimal import Decimal
+from re import S
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -11,11 +12,20 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
+
 from core.models import Recipe
 
-from recipe.serializers import RecipeSerializer
+from recipe.serializers import (
+    RecipeSerializer,
+    RecipeDetailSerializer,
+    )
 
-RECIPES_URL = reverse(recipe:recipes-list)
+RECIPES_URL = reverse('recipe:recipe-list')
+
+def detail_url(recipe_id):
+    """Create and return a recipe detail URL."""
+    return reverse('recipe:recipe-detail', args=[recipe_id])
+
 
 def create_recipe(user, **params):
     """Create and return a sample recipe"""
@@ -24,7 +34,7 @@ def create_recipe(user, **params):
         'time_minutes': 22,
         'price': Decimal('5.25'),
         'description': 'Sample Description',
-        'link:': 'http://example.com/recipe.pdf',
+        'link': 'http://example.com/recipe.pdf',
     }
     defaults.update(params)
 
@@ -86,3 +96,29 @@ class PrivateRecipeApiTests(TestCase):
         recipes = Recipe.objects.filter(user=self.user).order_by('-id')
         serializer = RecipeSerializer(recipes, many=True)
         self.assertEqual(res.data, serializer.data)
+
+    def test_get_recipe_detail(self):
+        """Test get recipe detail"""
+
+        recipe = create_recipe(user=self.user)
+
+        url = detail_url(recipe.id)
+        res = self.client.get(url)
+
+        serializer = RecipeDetailSerializer(recipe)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_create_recipe(self):
+        """Test creating a recipe"""
+        payload = {
+            'title': 'sample recipe',
+            'time_minutes': 40,
+            'price': Decimal('5.4'),            
+        }
+        res = self.client.post(RECIPES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id = res.data['id'])
+        for k, v in payload.items():
+            self.assertEqual(getattr(recipe,k), v)
+        self.assertEqual(recipe.user, self.user)
