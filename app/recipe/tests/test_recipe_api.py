@@ -11,8 +11,6 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-
-
 from core.models import Recipe
 
 from recipe.serializers import (
@@ -21,6 +19,7 @@ from recipe.serializers import (
     )
 
 RECIPES_URL = reverse('recipe:recipe-list')
+
 
 def detail_url(recipe_id):
     """Create and return a recipe detail URL."""
@@ -66,7 +65,7 @@ class PrivateRecipeApiTests(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        self.user = create_user(email='user@example.com', password='123Pass')        
+        self.user = create_user(email='user@example.com', password='123Pass')
         self.client.force_authenticate(self.user)
 
     def test_retrieve_recipe(self):
@@ -82,7 +81,10 @@ class PrivateRecipeApiTests(TestCase):
 
     def test_recipe_limited_to_user(self):
         """Test recipes are limited to user currently loged in"""
-        other_user = create_user(email='other_user@example.com', password='testpass')
+        other_user = create_user(
+            email='other_user@example.com',
+            password='testpass'
+        )
 
         create_recipe(user=self.user)
         create_recipe(user=other_user)
@@ -113,12 +115,12 @@ class PrivateRecipeApiTests(TestCase):
         payload = {
             'title': 'sample recipe',
             'time_minutes': 40,
-            'price': Decimal('5.4'),            
+            'price': Decimal('5.4'),
         }
         res = self.client.post(RECIPES_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        recipe = Recipe.objects.get(id = res.data['id'])
+        recipe = Recipe.objects.get(id=res.data['id'])
         for k, v in payload.items():
             self.assertEqual(getattr(recipe, k), v)
         self.assertEqual(recipe.user, self.user)
@@ -130,10 +132,10 @@ class PrivateRecipeApiTests(TestCase):
         recipe = create_recipe(
             user=self.user,
             title='Sample Recipe',
-            link = original_link,
+            link=original_link,
         )
 
-        payload = { 'title': 'new recipe title'}
+        payload = {'title': 'new recipe title'}
         url = detail_url(recipe.id)
         res = self.client.patch(url, payload)
 
@@ -152,7 +154,7 @@ class PrivateRecipeApiTests(TestCase):
             description='Description sample'
         )
 
-        payload = { 
+        payload = {
             'title': 'new recipe title',
             'link': 'https://newlink.com/recipe.pdf',
             'description': 'new description',
@@ -162,11 +164,10 @@ class PrivateRecipeApiTests(TestCase):
         url = detail_url(recipe.id)
         res = self.client.put(url, payload)
 
-
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         recipe.refresh_from_db()
         for k, v in payload.items():
-            self.assertEqual(getattr(recipe,k), v)
+            self.assertEqual(getattr(recipe, k), v)
         self.assertEqual(recipe.user, self.user)
 
     def test_update_user_return_error(self):
@@ -182,7 +183,7 @@ class PrivateRecipeApiTests(TestCase):
         url = detail_url(recipe.id)
 
         res = self.client.patch(url, payload)
-
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
         recipe.refresh_from_db()
         self.assertEqual(recipe.user, self.user)
 
@@ -200,7 +201,6 @@ class PrivateRecipeApiTests(TestCase):
         """Test deletion of another user recipe is impossible"""
         new_user = create_user(email="toto@example.com", password="toto123")
         recipe = create_recipe(user=new_user)
-
 
         url = detail_url(recipe.id)
         res = self.client.delete(url)
