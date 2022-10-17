@@ -1,6 +1,5 @@
 """"Serializers for Recipes"""
 
-from importlib.metadata import requires
 from rest_framework import serializers
 
 from core.models import Recipe, Tag, Ingredient
