@@ -1,3 +1,4 @@
 {
-  "cornflakes.linter.executablePath": "C:\\Users\\fabri\\Dev\\recipe-api\\.venv\\Scripts\\flake8"
+  "cornflakes.linter.executablePath": "C:\\Users\\fabri\\Dev\\recipe-api\\.venv\\Scripts\\flake8",
+  "python.analysis.typeCheckingMode": "off"
 }
