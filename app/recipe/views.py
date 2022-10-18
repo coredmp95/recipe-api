@@ -1,6 +1,10 @@
 """"Views for the Recipe API"""
 
-from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter, OpenApiTypes
+from drf_spectacular.utils import (
+    extend_schema_view,
+    extend_schema,
+    OpenApiParameter,
+    OpenApiTypes)
 from rest_framework import (
     viewsets,
     mixins,
@@ -16,6 +20,20 @@ from core.models import Recipe, Tag, Ingredient
 from recipe import serializers
 
 
+@extend_schema_view(
+    list=extend_schema(
+        OpenApiParameter(
+            'tags',
+            OpenApiTypes.STR,
+            description='Comma separated list of IDs to filter'
+        ),
+        OpenApiParameter(
+            'ingredients',
+            OpenApiTypes.STR,
+            description='Comma separated list of IDs to filter'
+        )
+    )
+)
 class RecipeViewSet(viewsets.ModelViewSet):
     """The model view for the Recipe APIs"""
     serializer_class = serializers.RecipeDetailSerializer
@@ -64,9 +82,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class BaseRecipeAttrViewSet(mixins.DestroyModelMixin,
