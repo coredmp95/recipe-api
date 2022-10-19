@@ -11,7 +11,8 @@ ENV APP_PORT=9000
 
 USER root
 
-RUN mkdir -p /vol/static && \
+RUN apk add curl && \
+    mkdir -p /vol/static && \
     chmod 755 /vol/static && \
     chown -R nginx:nginx /vol/static && \
     touch /etc/nginx/conf.d/default.conf && \
